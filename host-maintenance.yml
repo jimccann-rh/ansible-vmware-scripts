@@ -1,0 +1,95 @@
+---
+
+- debug:
+    msg:
+     - "{{ play_hosts.index(inventory_hostname) }}"
+     - "{{ ansible_play_hosts.index(inventory_hostname) }}"
+
+
+- name: Wait 24 hrs for port 22 to become open
+  ansible.builtin.wait_for:
+    port: 22
+    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+#    search_regex: OpenSSH
+    delay: 300 
+    timeout: 86400
+  connection: local
+
+- name: host facts
+  block:
+    - pause:
+        seconds: 300
+
+    - name: Does ESXi exist in vCenter
+      community.vmware.vmware_host_facts:
+        esxi_hostname: '{{ inventory_hostname }}'
+      register: esxi_host_facts
+      until: ansible_uptime > 900
+      retries: 300
+      delay: 60 
+
+    - debug:
+        msg:
+         - "{{ esxi_host_facts }}"
+         - "what mode is ESXi host in maintenmode? {{ ansible_in_maintenance_mode }}"
+
+  rescue:
+
+    - debug:
+        msg:
+         - "HOST NOT FOUND"
+  delegate_to: localhost
+
+- name: host exit maintenance mode
+  block:
+    - name: Exit Maintenance Mode
+      community.vmware.vmware_maintenancemode:
+        esxi_hostname: '{{ inventory_hostname }}'
+        state: absent
+      delegate_to: localhost
+      register: result
+      until: result.status == "EXIT"
+#      until: result.msg.find("exited maintenance mode") != -1
+      retries: 300
+      delay: 60
+
+    - debug:
+        msg:
+         - "{{ result }}"
+
+  when: ansible_in_maintenance_mode | bool and ansible_uptime > 900
+
+
+#- name: Enter VSAN-Compliant Maintenance Mode
+#  community.vmware.vmware_maintenancemode:
+#    esxi_hostname: '{{ inventory_hostname }}'
+#    vsan: evacuateAllData
+#    #vsan: ensureObjectAccessibility
+#    #evacuate: true
+#    #timeout: 3600
+#    state: present
+#  delegate_to: localhost
+
+
+
+#- name: Gather cluster facts from given datacenter
+#  vmware_cluster_facts:
+#    hostname: '{{ vcenter_hostname }}'
+#    username: '{{ vcenter_username }}'
+#    password: '{{ vcenter_password }}'
+#    datacenter: ha-datacenter
+#    validate_certs: no
+#  delegate_to: localhost
+#  register: cluster_facts
+#
+#- name: Gather facts from datacenter about specific cluster
+#  vmware_cluster_facts:
+#    hostname: '{{ vcenter_hostname }}'
+#    username: '{{ vcenter_username }}'
+#    password: '{{ vcenter_password }}'
+#    cluster_name: DC0_C0
+#  delegate_to: localhost
+#  register: cluster_facts
+
+
+

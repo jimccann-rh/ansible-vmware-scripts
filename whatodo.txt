@@ -1,0 +1,7 @@
+ansible-playbook main-fips.yml --extra-var changefipsmode=true --tag packlocal -K
+ansible-playbook main-fips.yml --extra-var changefipsmode=true
+
+
+
+
+ansible-playbook -i hosts mainm.yml 

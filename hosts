@@ -1,0 +1,29 @@
+# ORDER of idrac and esxi is IMPORTANT
+[all]
+ansible_python_interpreter=/usr/bin/python3
+
+[esxi]
+10.93.60.139
+10.93.60.140
+#nestedhost1 ansible_host=10.93.60.140
+
+[vcenters]
+nestedvcenter ansible_host=10.93.60.138
+
+[esxi:vars]
+# Credentials for esxi
+ansible_user=root
+ansible_password=
+ansible_python_interpreter=/usr/bin/python3
+ansible_ssh_extra_args='-o StrictHostKeyChecking=no'
+ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null'
+
+#[web:vars]
+# Credentials for OOB controller
+#ansible_user=root
+#ansible_user=jim
+
+# Shorter name for inventory_hostname.
+# Refers to the OS hostname, not the OOB controller.
+#host="{{inventory_hostname}}"
+

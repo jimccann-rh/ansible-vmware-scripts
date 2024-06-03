@@ -1,0 +1,40 @@
+---
+
+- name: ESXi management
+  hosts: localhost
+  gather_facts: true
+  collections:
+    - community.general
+
+  tags:
+    - packlocal
+    - never
+  
+  tasks:
+
+    - name: Needed packages on system
+      include_tasks: packlocal.yml
+
+
+- hosts: esxi
+#- hosts: esxi[1:] 
+  name: ESXi maintenance mode
+  gather_facts: False
+  vars:
+
+  collections:
+    - community.general
+    - community.vmware
+
+  module_defaults:
+    group/vmware:
+      hostname: "10.93.60.138"
+      username: "administrator@vsphere.local"
+      password: "{{ lookup('ansible.builtin.env', 'VCPASSWORD') }}"
+      validate_certs: false
+
+  tasks:
+
+    - name: Host mode
+      include_tasks: host-maintenance.yml
+
