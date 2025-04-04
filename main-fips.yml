@@ -9,16 +9,15 @@
   tags:
     - packlocal
     - never
-  
+
   tasks:
 
     - name: Needed packages on system
       include_tasks: packlocal.yml
 
-
 - hosts: localhost
   name: vcenter fips mode
-  gather_facts: False
+  gather_facts: false
   vars:
     changefipsmode: false
     fipsmode: false
@@ -42,4 +41,3 @@
 
     - name: Host mode
       include_tasks: fips.yml
-

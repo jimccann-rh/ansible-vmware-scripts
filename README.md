@@ -1,2 +1,2 @@
 # ansible-vmware-scripts
-Just some scripts using ansible
+Host in maintenance mode

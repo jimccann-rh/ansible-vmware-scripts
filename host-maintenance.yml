@@ -2,16 +2,15 @@
 
 - debug:
     msg:
-     - "{{ play_hosts.index(inventory_hostname) }}"
-     - "{{ ansible_play_hosts.index(inventory_hostname) }}"
-
+      - "{{ play_hosts.index(inventory_hostname) }}"
+      - "{{ ansible_play_hosts.index(inventory_hostname) }}"
 
 - name: Wait 24 hrs for port 22 to become open
   ansible.builtin.wait_for:
     port: 22
     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-#    search_regex: OpenSSH
-    delay: 300 
+    # search_regex: OpenSSH
+    delay: 300
     timeout: 86400
   connection: local
 
@@ -26,18 +25,18 @@
       register: esxi_host_facts
       until: ansible_uptime > 900
       retries: 300
-      delay: 60 
+      delay: 60
 
     - debug:
         msg:
-         - "{{ esxi_host_facts }}"
-         - "what mode is ESXi host in maintenmode? {{ ansible_in_maintenance_mode }}"
+          - "{{ esxi_host_facts }}"
+          - "what mode is ESXi host in maintenmode? {{ ansible_in_maintenance_mode }}"
 
   rescue:
 
     - debug:
         msg:
-         - "HOST NOT FOUND"
+          - "HOST NOT FOUND"
   delegate_to: localhost
 
 - name: host exit maintenance mode
@@ -49,13 +48,13 @@
       delegate_to: localhost
       register: result
       until: result.status == "EXIT"
-#      until: result.msg.find("exited maintenance mode") != -1
+      # until: result.msg.find("exited maintenance mode") != -1
       retries: 300
       delay: 60
 
     - debug:
         msg:
-         - "{{ result }}"
+          - "{{ result }}"
 
   when: ansible_in_maintenance_mode | bool and ansible_uptime > 900
 

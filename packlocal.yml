@@ -1,24 +1,5 @@
 ---
 
-# local
-# pip3 install git+https://github.com/rthalley/dnspython.git
-# pip3 install pyvmomi
-# pip3 install pyvim
-# pip3 install requests
-# pip3 install omsdk
-# dnf copr enable quadsdev/python3-badfish  -y
-# dnf install python3-badfish -y
-
-
-
-
-# remote
-# sudo dnf install libnsl
-# sudo dnf install genisoimage
-# sudo dnf install python-pyvmomi
-
-
-
 - name: install galaxy
   shell: 'ansible-galaxy collection install {{ item }}'
   loop:
@@ -39,18 +20,15 @@
       - python3-pip
       - git
       - gcc
-#      - python3-badfish
+      # - python3-badfish
     state: latest
   become: true
-
-
-
 
 - name: Install needed python packages
   ansible.builtin.pip:
     name:
-#      - git+https://github.com/rthalley/dnspython.git
-#      - git+https://github.com/redhat-performance/badfish
+      # - git+https://github.com/rthalley/dnspython.git
+      # - git+https://github.com/redhat-performance/badfish
       - git+https://github.com/vmware/vsphere-automation-sdk-python.git
       - dnspython
       - pyvmomi
@@ -58,5 +36,3 @@
       - requests
       - omsdk
       - jmespath
-
-

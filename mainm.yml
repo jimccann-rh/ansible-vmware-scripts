@@ -9,17 +9,16 @@
   tags:
     - packlocal
     - never
-  
+
   tasks:
 
     - name: Needed packages on system
       include_tasks: packlocal.yml
 
-
 - hosts: esxi
-#- hosts: esxi[1:] 
+  # - hosts: esxi[1:]
   name: ESXi maintenance mode
-  gather_facts: False
+  gather_facts: false
   vars:
 
   collections:
@@ -37,4 +36,3 @@
 
     - name: Host mode
       include_tasks: host-maintenance.yml
-
