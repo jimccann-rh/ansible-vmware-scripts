@@ -5,21 +5,44 @@
       - "{{ play_hosts.index(inventory_hostname) }}"
       - "{{ ansible_play_hosts.index(inventory_hostname) }}"
 
-- name: Wait 24 hrs for port 22 to become open
-  ansible.builtin.wait_for:
-    port: 22
-    host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
-    # search_regex: OpenSSH
-    delay: 300
-    timeout: 86400
-  connection: local
+# - name: Wait 24 hrs for port 22 to become open
+#   ansible.builtin.wait_for:
+#     port: 22
+#     host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+#     # search_regex: OpenSSH
+#     delay: 300
+#     timeout: 86400
+#   connection: local
+
+- name: Block to continuously wait for port 22 until connection
+  block:
+    - name: Continuously wait for port 22 to become open
+      ansible.builtin.wait_for:
+        port: 22
+        host: '{{ (ansible_ssh_host|default(ansible_host))|default(inventory_hostname) }}'
+        # search_regex: OpenSSH
+        # delay: 300
+        timeout: 86400
+      register: wait_for_result
+      until: wait_for_result.elapsed < 86400 # Check if elapsed time is less than the timeout
+      retries: "{{ (24 * 60 * 60 / 300) | int }}"
+      delay: 300
+      connection: local
+  rescue:
+    - name: Handle timeout if port 22 *never* opens (after continuous retries)
+      ansible.builtin.debug:
+        msg: "Error: Port 22 did not become open even after continuous retries over 24 hours."
+  always:
+    - name: Finished waiting for port 22 (either connected or timed out after retries)
+      ansible.builtin.debug:
+        msg: "Finished waiting for port 22."
 
 - name: host facts
   block:
     - pause:
         seconds: 300
 
-    - name: Does ESXi exist in vCenter
+    - name: Does ESXi exist in vCenter and uptime is 15min
       community.vmware.vmware_host_facts:
         esxi_hostname: '{{ inventory_hostname }}'
       register: esxi_host_facts
